@@ -3,7 +3,7 @@ import re
 import numpy as np
 import pandas as pd
 
-maxlen = 128
+maxlen = 32
 s = open('msr_train.txt').read()
 s = s.split('\r\n')
 
@@ -61,11 +61,11 @@ from keras.utils import np_utils
 d['x'] = d['data'].apply(lambda x: np.array(list(chars[x]) + [0] * (maxlen - len(x))))
 d['y'] = d['label'].apply(lambda x: np.array(
     map(lambda y: np_utils.to_categorical(y, 5), tag[x].reshape((-1, 1))) + [np.array([[0, 0, 0, 0, 1]])] * (
-    maxlen - len(x))))
+        maxlen - len(x))))
 
 # 设计模型
 word_size = 128
-maxlen = 32
+
 from keras.layers import Dense, Embedding, LSTM, TimeDistributed, Input, Bidirectional
 from keras.models import Model
 
@@ -73,7 +73,7 @@ sequence = Input(shape=(maxlen,), dtype='int32')
 embedded = Embedding(len(chars) + 1, word_size, input_length=maxlen, mask_zero=True)(sequence)
 blstm = Bidirectional(LSTM(64, return_sequences=True), merge_mode='sum')(embedded)
 output = TimeDistributed(Dense(5, activation='softmax'))(blstm)
-model = Model(input=sequence, output=output)
+model = Model(inputs=sequence, outputs=output)
 model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
 
 batch_size = 1024
@@ -112,8 +112,9 @@ def viterbi(nodes):
 def simple_cut(s):
     if s:
         r = \
-        model.predict(np.array([list(chars[list(s)].fillna(0).astype(int)) + [0] * (maxlen - len(s))]), verbose=False)[
-            0][:len(s)]
+            model.predict(np.array([list(chars[list(s)].fillna(0).astype(int)) + [0] * (maxlen - len(s))]),
+                          verbose=False)[
+                0][:len(s)]
         r = np.log(r)
         nodes = [dict(zip(['s', 'b', 'm', 'e'], i[:4])) for i in r]
         t = viterbi(nodes)
