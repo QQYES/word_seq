@@ -60,7 +60,7 @@ from keras.utils import np_utils
 
 d['x'] = d['data'].apply(lambda x: np.array(list(chars[x]) + [0] * (maxlen - len(x))))
 d['y'] = d['label'].apply(lambda x: np.array(
-    map(lambda y: np_utils.to_categorical(y, 5), tag[x].reshape((-1, 1))) + [np.array([[0, 0, 0, 0, 1]])] * (
+    list(map(lambda y: np_utils.to_categorical(y, 5), tag[x].reshape((-1, 1)))) + [np.array([[0, 0, 0, 0, 1]])] * (
         maxlen - len(x))))
 
 # 设计模型
